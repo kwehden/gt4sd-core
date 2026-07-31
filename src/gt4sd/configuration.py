@@ -27,6 +27,7 @@ import logging
 import os
 from functools import lru_cache
 from typing import Dict, Optional, Set
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .s3 import GT4SDS3Client, S3SyncError, sync_folder_with_s3, upload_file_to_s3
@@ -52,8 +53,8 @@ class GT4SDConfiguration(BaseSettings):
     gt4sd_disable_cudnn: bool = False
 
     gt4sd_s3_host: str = "s3.par01.cloud-object-storage.appdomain.cloud"
-    gt4sd_s3_access_key: str = "b087e6810a5d4246a64e07e36ace338f"
-    gt4sd_s3_secret_key: str = "ba4a1db5647a32c6109b58714befb7ea7145b983143e0836"
+    gt4sd_s3_access_key: str = "903d388dcbfe434da80b08ac8e74eaf6"
+    gt4sd_s3_secret_key: str = "1f33e15f41bcf7412551bd343108c40fc81a16da5a5fe081"
     gt4sd_s3_secure: bool = True
     gt4sd_s3_bucket_algorithms: str = "gt4sd-cos-algorithms-artifacts"
     gt4sd_s3_bucket_properties: str = "gt4sd-cos-properties-artifacts"
@@ -196,7 +197,6 @@ def sync_algorithm_with_s3(
 def get_cached_algorithm_path(
     prefix: Optional[str] = None, module: str = "algorithms"
 ) -> str:
-
     if module not in gt4sd_artifact_management_configuration.gt4sd_s3_modules:
         raise ValueError(
             f"Unknown cache module: {module}. Supported modules: "
@@ -263,6 +263,14 @@ def get_algorithm_subdirectories_with_s3(
             prefix=prefix,
         )
 
+    except Exception:
+        logger.exception("generic syncing error")
+        raise S3SyncError(
+            "CacheSyncingError",
+            f"error in getting directories of prefix={prefix}",
+        )
+
+    try:
         # directories in the write public-hub bucket
         dirs_hub = get_algorithm_subdirectories_from_s3_coordinates(
             host=gt4sd_configuration_instance.gt4sd_s3_host_hub,
@@ -272,17 +280,11 @@ def get_algorithm_subdirectories_with_s3(
             secure=gt4sd_configuration_instance.gt4sd_s3_secure_hub,
             prefix=prefix,
         )
-
-        # set of directories in the public bucket and public hub bucket
-        versions = dirs.union(dirs_hub)
-        return versions
-
+        dirs = dirs.union(dirs_hub)
     except Exception:
-        logger.exception("generic syncing error")
-        raise S3SyncError(
-            "CacheSyncingError",
-            f"error in getting directories of prefix={prefix}",
-        )
+        logger.info("error in getting directories from hub, using public bucket only")
+
+    return dirs
 
 
 def get_algorithm_subdirectories_in_cache(
