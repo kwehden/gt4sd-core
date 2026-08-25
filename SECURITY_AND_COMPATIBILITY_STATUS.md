@@ -66,8 +66,9 @@ A minimal upstream patch changes those three masks to `torch.bool`:
 The patch is committed locally in the GT4SD Moses clone as
 `07b087c` (`fix: use boolean sequence masks for torch 2.x`), based on the
 pinned Moses `v0.2.0` source. It is not yet reachable from this repository's
-`vcs_requirements.txt`: publishing it requires GitHub authentication, then
-updating the GT4SD GuacaMol-baselines fork and this repository to pin the
+`vcs_requirements.txt`: publishing it requires GitHub Git-write access to the
+GT4SD organization repository (and any required organization SSO authorization),
+then updating the GT4SD GuacaMol-baselines fork and this repository to pin the
 published immutable commits.
 
 ## Verification
