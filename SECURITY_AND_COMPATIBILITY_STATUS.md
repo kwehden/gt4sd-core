@@ -51,7 +51,7 @@ The committed dependency manifests still pin Torch 1.12. This branch proves
 source compatibility with Torch 2.6; it does **not** yet ship a production
 Torch 2 migration or claim that Torch-related advisories are closed.
 
-## Validated upstream Moses fix; not yet delivered
+## Validated Moses fix published to testing forks
 
 Torch 2 requires boolean masks for tensor indexing. The pinned Moses 0.2.0
 source uses `torch.uint8` end-of-sequence masks, causing five failures under
@@ -63,13 +63,13 @@ A minimal upstream patch changes those three masks to `torch.bool`:
 - `moses/vae/model.py`
 - `moses/organ/model.py`
 
-The patch is committed locally in the GT4SD Moses clone as
-`07b087c` (`fix: use boolean sequence masks for torch 2.x`), based on the
-pinned Moses `v0.2.0` source. It is not yet reachable from this repository's
-`vcs_requirements.txt`: publishing it requires GitHub Git-write access to the
-GT4SD organization repository (and any required organization SSO authorization),
-then updating the GT4SD GuacaMol-baselines fork and this repository to pin the
-published immutable commits.
+The patch is published in the Moses testing fork as
+[`07b087c`](https://github.com/kwehden/moses/commit/07b087c909ed9e07ed42513e6561032b32ecc88d)
+(`fix: use boolean sequence masks for torch 2.x`), based on the pinned Moses
+`v0.2.0` source. The GuacaMol-baselines testing fork pins that exact Moses
+commit in
+[`c4d50e5`](https://github.com/kwehden/guacamol_baselines/commit/c4d50e5646af44494b61b52c50793b90fe7df540),
+and this branch pins both immutable commits in `vcs_requirements.txt`.
 
 ## Verification
 
@@ -87,11 +87,10 @@ replace CI after the dependency pins are published.
 
 ## Remaining work
 
-1. Publish the Moses boolean-mask patch and update the GuacaMol-baselines and
-   GT4SD VCS dependency pins to immutable commits.
-2. Re-run CI from a clean environment after those published pins are used.
-3. Plan the production Torch migration separately. The current Torch 1.12
+1. Re-run CI from a clean environment after the published testing-fork pins
+   are installed.
+2. Plan the production Torch migration separately. The current Torch 1.12
    cap still blocks upgrades to parts of the Transformers, Diffusers, and
    related ML stack.
-4. Keep the TensorFlow/Keras/Protobuf upgrade work separate; it is constrained
+3. Keep the TensorFlow/Keras/Protobuf upgrade work separate; it is constrained
    by the independent `tensorflow<2.11` runtime floor.
