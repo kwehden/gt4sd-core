@@ -9,6 +9,8 @@ dependencies:
   - python>=3.7,<3.11
   - pip=24.0
   - pytorch>=1.0,<=1.12.1
+  # Torch 1.12 binaries require the pre-2024 Intel JIT/OpenMP ABI.
+  - mkl<2024
   - cpuonly
   - pytorch-scatter<=2.0.9=*cu102*
   - pip:
